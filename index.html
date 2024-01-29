@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+      .cover {
+        position: relative;
+        width: fit-content;
+      }
+      .cover > video {
+        width: 80dvw;
+        margin: 0 auto;
+      }
+      .text-cover {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 20px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        font-style: italic;
+        width: 70dvw;
+        transition: all 0.5s ease-in-out;
+        height: 60%;
+        list-style: none;
+      }
+      .text-cover > li {
+        transition: all 0.5s ease-in-out;
+      }
+    </style>
+  </head>
+  <body id="app">
+    <div class="cover">
+      <video ref="videoDiv" controls @loadedmetadata="logDuration">
+        <source src="./pexels_videos_4026 (360p).mp4" type="" />
+      </video>
+      <ul class="text-cover">
+        <li
+          v-for="(detail, index) in textList"
+          :key="detail.text"
+          v-show="detail.shouldShow"
+        >
+          {{detail.text}}
+        </li>
+      </ul>
+    </div>
+  </body>
+
+  <script>
+    const { createApp, ref } = Vue;
+
+    createApp({
+      data() {
+        return {
+          textList: [
+            {
+              text: "Enjoy the first advernture of this text",
+              shouldShow: false,
+            },
+            {
+              text: "Now we are going to show you a secret",
+              shouldShow: false,
+            },
+            {
+              text: "... promise you wont tell anyone",
+              shouldShow: false,
+            },
+            {
+              text: "... are you sure you ain't gonna tell anyone?",
+              shouldShow: false,
+            },
+            {
+              text: "... You telling me you are not gonna tell anyone, right?",
+              shouldShow: false,
+            },
+            {
+              text: "... I'm trying to trust you o...",
+              shouldShow: false,
+            },
+            {
+              text: "... Tadaaaaaa!!! I'm a text that appears on a video",
+              shouldShow: false,
+            },
+          ],
+          videoDiv: ref(null),
+          videoDuration: 0,
+          videoSections: 0,
+          currentTime: 0,
+        };
+      },
+      watch: {
+        currentTime: {
+          handler(newValue, oldValue) {
+            this.textList.forEach((text, index) => {
+              if (
+                newValue >= this.videoSections * index &&
+                newValue < this.videoSections * (index + 1)
+              ) {
+                text.shouldShow = true;
+              } else {
+                text.shouldShow = false;
+              }
+            });
+          },
+        },
+      },
+      computed: {
+        shouldShow: {
+          get(index) {
+            return this.currentTime >= this.videoSections;
+          },
+          set(index) {},
+        },
+      },
+      methods: {
+        playVideo() {
+          this.$refs.videoDiv.play();
+        },
+        setCurrentTime() {
+          this.$refs.videoDiv.addEventListener(
+            "timeupdate",
+            () =>
+              (this.currentTime = this.$refs.videoDiv.currentTime.toFixed(2))
+          );
+        },
+        logDuration() {
+          this.playVideo();
+          this.setCurrentTime();
+          this.videoDuration = this.$refs.videoDiv.duration.toFixed(2);
+          this.videoSections = (
+            this.videoDuration / this.textList.length
+          ).toFixed(2);
+        },
+      },
+    }).mount("#app");
+  </script>
+</html>
